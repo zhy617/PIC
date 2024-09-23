@@ -1,0 +1,159 @@
+// #use <string>
+// #use <parse>
+// #use <conio>
+// #use <args>
+// #use <util>
+// // #use "stacks_int.c0"
+
+// void op_add(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   push(S, x + y);
+// }
+
+// void op_sub(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   push(S, x - y);
+// }
+
+// void op_mul(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   push(S, x * y);
+// }
+
+// void op_div(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   if(y == 0) error("division by 0");
+//   if(x == int_min() && y == -1) error("division overflow");
+//   push(S, x / y);
+// }
+
+// void op_mod(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   if(y == 0) error("modulo by 0");
+//   push(S, x % y);
+// }
+
+// void op_less(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   if(x < y) push(S, 1);
+//   else push(S, 0);
+// }
+
+// void op_drop(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+// }
+
+// void op_swap(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   push(S, x);
+//   push(S, y);
+// }
+
+// void op_dup(stack S)
+// //@requires !stack_empty(S);
+// //@ensures !stack_empty(S);
+// {
+//   int x = pop(S);
+//   push(S, x);
+//   push(S, x);
+// }
+
+// void op_rot(stack S)
+// //@requires !stack_empty(S);
+// {
+//   int z = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int y = pop(S);
+//   if(stack_empty(S))error("insufficient numbers");
+//   int x = pop(S);
+//   push(S, y);
+//   push(S, z);
+//   push(S, x);
+// }
+
+// /* return true if legal oprand */
+// bool oprand(stack S, string op)
+// //@requires !stack_empty(S);
+// {
+//     if(string_equal(op, "+")){
+//         op_add(S);
+//         return true;
+//     }
+//     if(string_equal(op, "-")){
+//         op_sub(S);
+//         return true;
+//     }
+//     if(string_equal(op, "*")){
+//         op_mul(S);
+//         return true;
+//     }
+//     if(string_equal(op, "/")){
+//         op_div(S);
+//         return true;
+//     }
+//     if(string_equal(op, "%")){
+//         op_mod(S);
+//         return true;
+//     }
+//     if(string_equal(op, "<")){
+//         op_less(S);
+//         return true;
+//     }
+//     if(string_equal(op, "drop")){
+//         op_drop(S);
+//         return true;
+//     }
+//     if(string_equal(op, "swap")){
+//         op_swap(S);
+//         return true;
+//     }
+//     if(string_equal(op, "dup")){
+//         op_dup(S);
+//         return true;
+//     }
+//     if(string_equal(op, "rot")){
+//         op_rot(S);
+//         return true;
+//     }
+//     return false;
+// }
+
+

@@ -1,0 +1,5 @@
+int f(int[] A)
+//@requires \length(A)>0;
+{
+	return A[0]^((1<<30)-1);
+}

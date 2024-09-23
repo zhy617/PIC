@@ -1,0 +1,319 @@
+/*
+ * Peg solitaire solver
+ *
+ * 15-122 Principles of Imperative Computation */
+
+#use <args>
+#use <conio>
+#use <util>
+
+/*
+ * Peg solitaire solver
+ *
+ * 15-122 Principles of Imperative Computation */
+
+
+typedef int move;
+
+int row_start(move m)
+  ;
+
+int col_start(move m)
+  ;
+
+int row_end(move m)
+  ;
+
+int col_end(move m)
+  ;
+
+
+int row_start(move m){
+  int x = m / 1000;
+  x %= 10;
+  return x;
+}
+
+int col_start(move m){
+  int y = m / 100;
+  y %= 10;
+  return y;
+}
+
+int row_end(move m){
+  int x = m /10;
+  x %= 10;
+  return x;
+}
+
+int col_end(move m){
+  int y = m;
+  return y%10;
+}
+
+int to(int r, int c){
+  return r*8 + c;
+}
+
+move op(int r_s, int c_s, int r_e, int c_e)
+{
+  return r_s*1000 + c_s*100 + r_e*10 + c_e;
+}
+
+bool chk(board A, board B)
+//@requires \length(A) == \length(B);
+//@requires \length(A) == 64;
+{
+  for(int i = 0; i < 64; i++){
+    if(A[i] != B[i])return false;
+  }
+  return true;
+}
+
+htelem trans(board B)
+//@requires is_board(B);
+{
+  htelem now = alloc(struct two_ints);
+  now->i1 = 0;
+  for(int i = 0; i < 32; i++){
+    if(B[i] == 1)now->i1 = now->i1 * 2 + 1;
+    else now->i1 = now->i1 * 2;
+  }
+  now->i2 = 0;
+  for(int i = 32; i < 64; i++){
+    if(B[i] == 1)now->i2 = now->i2 * 2 + 1;
+    else now->i2 = now->i2 * 2;
+  }
+  now->best_num_pegs = num_pegs(B);
+  return now;
+}
+
+void change(htelem nowhtkey, int ord, int op){
+  if(ord <= 31){
+    nowhtkey->i1 += op*(1 << (31-ord));
+  }else{
+    nowhtkey->i2 += op*(1 << (63-ord));
+  }
+}
+
+int solve1(board B, stack S, ht H, int res, int[] dx, int[] dy)
+//@requires is_board(B);
+//@requires is_ht(H);
+//@requires num_pegs(B) >= 1;
+//@requires is_stack(S);
+//@ensures is_board(B);
+{
+  if(res == 1) return 1;
+  htelem nowhtkey = trans(B);
+  htelem tofind = ht_lookup(H, nowhtkey);
+  if(tofind != NULL)return tofind->best_num_pegs;
+  move now = 0;
+  int least = res;
+//   board A = alloc_array(int, 64);
+//   for(int i = 0; i < 64; i++)A[i] = B[i];
+  for(int x = 0; x < 8; x++){
+    for(int y = 0; y < 8; y++){
+      if(B[to(x, y)] == 1){
+        for(int i = 0; i < 4; i++)
+        // @loop_invariant chk(A, B);
+        {
+          int tx = x + dx[i];
+          int ty = y + dy[i];
+          if(0 <= tx && tx < 8 && 0 <= ty && ty < 8 
+          && B[to(tx, ty)] == 1){
+            tx += dx[i];  ty += dy[i];
+            if(0 <= tx && tx < 8 && 0 <= ty && ty < 8 
+            && B[to(tx, ty)] == 0){
+              now = op(x, y, tx, ty);
+              B[to(x, y)] = 0;  
+              B[to(x + dx[i], y + dy[i])] = 0;  
+              B[to(tx, ty)] = 1;
+              least = min(least, solve1(B, S, H, res-1, dx, dy));
+              if(least == 1){
+                push(S, now);
+                return 1;
+              }
+              B[to(x, y)] = 1;  
+              B[to(x + dx[i], y + dy[i])] = 1;  
+              B[to(tx, ty)] = 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  if(least != 1){
+    nowhtkey->best_num_pegs = least;
+    ht_insert(H, nowhtkey);
+  }
+  return least;
+}
+
+int solve2(board B, stack S, ht H, int res, int[] dx, int[] dy, int[] order)
+//@requires is_board(B);
+//@requires is_ht(H);
+//@requires num_pegs(B) >= 1;
+//@requires is_stack(S);
+//@ensures is_board(B);
+{
+  if(res == 1) return 1;
+  htelem nowhtkey = trans(B);
+  htelem tofind = ht_lookup(H, nowhtkey);
+  if(tofind != NULL)return tofind->best_num_pegs;
+  // ht_insert(H, nowhtkey);
+  move now = 0;
+  int least = res;
+//   board A = alloc_array(int, 64);
+//   for(int i = 0; i < 64; i++)A[i] = B[i];
+  for(int index = 0; index < 64; index++){
+    int x = order[index] / 8;
+    int y = order[index] % 8;
+    if(B[to(x, y)] == 1){
+        for(int i = 0; i < 4; i++)
+        // @loop_invariant chk(A, B);
+        {
+            int tx = x + dx[i];
+            int ty = y + dy[i];
+            if(0 <= tx && tx < 8 && 0 <= ty && ty < 8 
+            && B[to(tx, ty)] == 1){
+                tx += dx[i];  ty += dy[i];
+                if(0 <= tx && tx < 8 && 0 <= ty && ty < 8 
+                && B[to(tx, ty)] == 0){
+                    now = op(x, y, tx, ty);
+                    B[to(x, y)] = 0;  
+                    B[to(x + dx[i], y + dy[i])] = 0;  
+                    B[to(tx, ty)] = 1;
+                    least = min(least, solve2(B, S, H, res-1, dx, dy, order));
+                    if(least == 1){
+                      push(S, now);
+                      return 1;
+                    }
+                    B[to(x, y)] = 1;  
+                    B[to(x + dx[i], y + dy[i])] = 1;  
+                    B[to(tx, ty)] = 0;
+                }
+            }
+        }
+    }
+  }
+  if(least != 1){
+    nowhtkey->best_num_pegs = least;
+    ht_insert(H, nowhtkey);
+  }
+  return least;
+}
+
+int getnei(board B, int x, int y, int[] dx, int[] dy){
+    int cnt=0;
+    for(int i = 0; i < 4; i++){
+      int tx = x + dx[i];
+      int ty = y + dy[i];
+      if(tx >= 0 && tx < 8 && ty >= 0 &&ty < 8 && B[tx*8 + ty] == 1){
+          cnt++;
+      }
+    }
+    return cnt;
+}
+
+int solve3(board B, stack S, ht H, int res, int[] dx, int[] dy, int[] order)
+//@requires is_board(B);
+//@requires is_ht(H);
+//@requires num_pegs(B) >= 1;
+//@requires is_stack(S);
+//@ensures is_board(B);
+{
+  if(res == 1) return 1;
+  htelem nowhtkey = trans(B);
+  htelem tofind = ht_lookup(H, nowhtkey);
+  if(tofind != NULL)return tofind->best_num_pegs;
+  move now = 0;
+  int least = res;
+//   board A = alloc_array(int, 64);
+//   for(int i = 0; i < 64; i++)A[i] = B[i];
+  for(int len = 4; len > 0; len--){
+    for(int index = 0; index < 49; index++){
+        int x = order[index] / 8;
+        int y = order[index] % 8;
+        if(getnei(B, x, y, dx, dy) == len){
+            if(B[to(x, y)] == 1){
+              for(int i = 0; i < 4; i++)
+              // @loop_invariant chk(A, B);
+              {
+                int tx = x + dx[i];
+                int ty = y + dy[i];
+                if(0 <= tx && tx < 8 && 0 <= ty && ty < 8 
+                && B[to(tx, ty)] == 1){
+                  tx += dx[i];  ty += dy[i];
+                  if(0 <= tx && tx < 8 && 0 <= ty && ty < 8 
+                  && B[to(tx, ty)] == 0){
+                    now = op(x, y, tx, ty);
+                    B[to(x, y)] = 0;  
+                    B[to(x + dx[i], y + dy[i])] = 0;  
+                    B[to(tx, ty)] = 1;
+                    least = min(least, solve3(B, S, H, res-1, dx, dy, order));
+                    if(least == 1){
+                      push(S, now);
+                      return 1;
+                    }
+                    B[to(x, y)] = 1;  
+                    B[to(x + dx[i], y + dy[i])] = 1;  
+                    B[to(tx, ty)] = 0;
+                  }
+                }
+              }
+            }
+        }
+    }
+  }
+  if(least != 1){
+    nowhtkey->best_num_pegs = least;
+    ht_insert(H, nowhtkey);
+  }
+  return least;
+}
+
+int peg_solve(board B, stack S)
+//@requires is_board(B);
+//@requires num_pegs(B) >= 1;
+//@requires stack_empty(S);
+//@ensures is_board(B);
+//@ensures \result >= 1;
+{
+  int[] dx = alloc_array(int, 4);
+  int[] dy = alloc_array(int, 4);
+  // dx[0] = 1;  dx[1] = 0;  dx[2] = -1;  dx[3] = 0;
+  // dy[0] = 0;  dy[1] = 1;  dy[2] = 0;  dy[3] = -1;
+
+  // dx[0] = 1;  dx[1] = 0;  dx[2] = 0;  dx[3] = -1;
+  // dy[0] = 0;  dy[1] = 1;  dy[2] = -1;  dy[3] = 0;
+  
+  // dx[0] = 0;  dx[1] = 1;  dx[2] = -1;  dx[3] = 0;
+  // dy[0] = 1;  dy[1] = 0;  dy[2] = 0;  dy[3] = -1;
+
+  // dx[0] = -1;  dx[1] = 1;  dx[2] = 0;  dx[3] = 0;
+  // dy[0] = 0;  dy[1] = 0;  dy[2] = -1;  dy[3] = 1;
+
+  dx[0] = -1;  dx[1] = 0;  dx[2] = 0;  dx[3] = 1;
+  dy[0] = 0;  dy[1] = -1;  dy[2] = 1;  dy[3] = 0;
+  ht H = ht_new(133331);
+  
+  int[] order = alloc_array(int, 8*8);
+  int index = 0;
+  for(int len = 0; len < 5; len++)
+    for(int i = 0; i < 7; i++){
+        for(int j = 0; j < 7; j++){
+            if(min(min(i, 7-i), min(j, 7-j)) == len){
+                order[index] = i*8 + j;
+                index++;
+            }
+        }
+    }
+  // int ans = solve3(B, S, H, num_pegs(B), dx, dy, order);
+  int ans = solve1(B, S, H, num_pegs(B), dx, dy);
+  // int ans = solve2(B, S, H, num_pegs(B), dx, dy, order);
+  
+  printint(ht_size(H));
+  println("\n");
+  ht_stats(H);
+  return ans;
+}

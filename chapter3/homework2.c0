@@ -1,0 +1,23 @@
+#use <string>
+#use <parse>
+string int2hex(int x)
+//@requires x>=0;
+//@ensures *parse_int(\result,16)==x;
+{
+	int mi=1;
+	int px=x;
+	while(mi<=px/16)mi*=16;
+	string ans="";
+	while(mi>=1){
+		int cc=px/mi;
+		px-=cc*mi;mi/=16;
+		if(cc<=9){
+			cc=char_ord('0')+cc;
+		}else{
+			cc=char_ord('A')+cc-10;
+		}
+		ans=string_join(ans, string_fromchar(char_chr(cc)));
+		
+	}
+	return ans;
+}

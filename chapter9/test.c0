@@ -1,0 +1,14 @@
+struct node{
+    int x;
+    struct node* next; 
+};
+bool cmp(struct node* a, struct node* b)
+//@requires a != NULL;
+//@requires b != NULL;
+{
+    return (*a).x < (*b).x; 
+}
+int main(){
+    struct node* x;
+    return 0;
+}

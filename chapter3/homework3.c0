@@ -1,0 +1,11 @@
+#use <util>
+int lsr(int x,int c)
+//@requires 0<=c && c<=32;
+{
+	if(c==0)return x;
+	if(x>=0)return x>>c;
+// 2^32 - |x| /2 = 2^31 - (|x|+1)/2 
+	x=2147483647-(abs(x)+1)/2+1;
+	x>>=(c-1);
+	return x;
+}

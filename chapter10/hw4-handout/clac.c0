@@ -1,0 +1,297 @@
+/*
+ * Clac, stack-based calculator language
+ *
+ * 15-122 Principles of Imperative Computation
+ */
+
+#use <string>
+#use <parse>
+#use <conio>
+#use <args>
+#use <util>
+#use "bonus.c0"
+
+void op_add(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  push(S, x + y);
+}
+
+void op_sub(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  push(S, x - y);
+}
+
+void op_mul(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  push(S, x * y);
+}
+
+void op_div(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  if(y == 0) error("division by 0");
+  if(x == int_min() && y == -1) error("division overflow");
+  push(S, x / y);
+}
+
+void op_mod(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  if(y == 0) error("modulo by 0");
+  push(S, x % y);
+}
+
+void op_less(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  if(x < y) push(S, 1);
+  else push(S, 0);
+}
+
+void op_drop(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+}
+
+void op_swap(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  push(S, x);
+  push(S, y);
+}
+
+void op_dup(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  push(S, x);
+  push(S, x);
+}
+
+void op_rot(stack S)
+//@requires !stack_empty(S) && is_stack(S);
+{
+  int z = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int x = pop(S);
+  push(S, y);
+  push(S, z);
+  push(S, x);
+}
+
+void op_skip(stack S, queue Q)
+//@requires !stack_empty(S) && is_stack(S);
+//@requires !queue_empty(Q) && is_queue(Q);
+{
+  if(stack_empty(S))error("insufficient tokens in the stack");
+  int n = pop(S);
+  if(n < 0)error(string_join("negative skip number: ", string_fromint(n)));
+  while(n > 0){
+    if(queue_empty(Q))error("insufficient tokens in the queue"); 
+    deq(Q);
+    n--;
+  }
+}
+
+void op_if(stack S, queue Q)
+//@requires !stack_empty(S) && is_stack(S);
+//@requires !queue_empty(Q) && is_queue(Q);
+{
+  int n = pop(S);
+  if(n != 0){
+    if(queue_empty(Q))error("insufficient tokens in the queue");
+    // deq(Q);
+  }else{
+    if(queue_empty(Q))error("insufficient tokens in the queue");
+    deq(Q);
+    if(queue_empty(Q))error("insufficient tokens in the queue");
+    deq(Q);
+  }
+}
+
+void op_else(stack S, queue Q)
+//@requires !stack_empty(S) && is_stack(S);
+//@requires !queue_empty(Q) && is_queue(Q);
+{
+  deq(Q);
+}
+
+void op_pick(stack S)
+//@requires !stack_empty(S) && is_stack(S);
+{
+  int n =pop(S);
+  if(n <= 0)error(string_join("negative pick number: ", string_fromint(n)));
+  int x = 0;
+  while(n > 0){
+    if(stack_empty(S))error("insufficient tokens in the stack");
+    x = pop(S);
+    n--;
+  }
+  push(S, x);
+}
+
+bool if_integer(string op)
+{
+  int len = string_length(op);
+  int flag = 1;
+  for(int i = 0; i < len; i ++){
+    if(string_charat(op, i)<'0' || string_charat(op, i)>'9'){
+      flag = 0;
+    }
+  }
+  if(flag == 1){
+    return true;
+  }
+  return false;
+}
+
+/* return true if legal oprand */
+bool oprand(stack S, queue Q,string op)
+//@requires !stack_empty(S);
+{
+    if(string_equal(op, "+")){
+        op_add(S);
+        return true;
+    }
+    if(string_equal(op, "-")){
+        op_sub(S);
+        return true;
+    }
+    if(string_equal(op, "*")){
+        op_mul(S);
+        return true;
+    }
+    if(string_equal(op, "/")){
+        op_div(S);
+        return true;
+    }
+    if(string_equal(op, "%")){
+        op_mod(S);
+        return true;
+    }
+    if(string_equal(op, "<")){
+        op_less(S);
+        return true;
+    }
+    if(string_equal(op, "drop")){
+        op_drop(S);
+        return true;
+    }
+    if(string_equal(op, "swap")){
+        op_swap(S);
+        return true;
+    }
+    if(string_equal(op, "dup")){
+        op_dup(S);
+        return true;
+    }
+    if(string_equal(op, "rot")){
+        op_rot(S);
+        return true;
+    }
+    if(string_equal(op, "skip")){
+        op_skip(S, Q);
+        return true;
+    }
+    if(string_equal(op, "if")){
+      op_if(S, Q);
+      return true;
+    }
+    if(string_equal(op, "else")){
+      op_else(S, Q);
+      return true;
+    }
+    if(string_equal(op, "pick")){
+      op_pick(S);
+      return true;
+    }
+    if(string_equal(op, "^")){
+      op_xor(S);
+      return true;
+    }
+    if(string_equal(op, "&")){
+      op_and(S);
+      return true;
+    }
+    if(string_equal(op, "|")){
+      op_or(S);
+      return true;
+    }
+    return false;
+}
+
+
+/* Return true: clac top-level interpreter will expect more input */
+/* Return false: clac top-level interpreter will exit */
+bool eval(queue Q, stack S)
+//@ensures !\result || queue_empty(Q);
+{
+  while (!queue_empty(Q)) {
+    string tok = deq(Q); /* is this dequeue safe? */
+    // print("Read: "); print(tok); print("\n");
+    if (string_equal(tok, "print")) {
+
+      /* next line is unsafe and should be fixed */
+      if (stack_empty(S))error("insufficient numbers in the stack");
+      int x = pop(S);
+      printint(x); print("\n");
+      // push(S, x);
+    } else if (string_equal(tok, "quit")) {
+      return false;             /* do not continue */
+    } else {
+      /* not defined as an operation name, should be an int */
+      int* p = parse_int(tok, 10);
+      
+      if (p == NULL) { /* not an int */
+        /* call error(msg) which prints msg and aborts */
+        // if(!oprand(S, Q, tok))error(string_join("undefined token ", tok));
+        // else error(string_join(tok, " is out of integer limit"));
+        if(if_integer(tok))error(string_join(tok, " is out of integer limit"));
+        else {
+          if(!oprand(S, Q, tok))error(string_join("undefined token ", tok));
+        }
+      }
+      else {
+        // printint(*p);
+        push(S, *p);
+      }
+    }
+  }
+  return true;                  /* continue */
+}

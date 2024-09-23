@@ -1,0 +1,50 @@
+// #use "doslingos.c0"
+// #use "lib/stringsearch.c0"
+// #use "lib/readfile.c0"
+#use "sort.c0"
+#use <conio>
+#use <string>
+string merge(string[] A, int n)
+//@requires 0 <= n && n <= \length(A);
+{
+    string s = "";
+    for(int i = 0; i < n; i++)
+    {
+        s = string_join(s, A[i]);
+    }
+    return s;
+}
+
+int main()
+{
+    int tweet_id=0;
+    string voc_path = "texts/news_vocab_sorted.txt";
+    string[] tweet_path = alloc_array(string, 3);
+    tweet_path[0] = "texts/scotttweet.txt";
+    tweet_path[1] = "texts/twitter_1k.txt";
+    tweet_path[2] = "texts/twitter_200k.txt";
+    
+    
+    string_bundle voc_bundle = read_words(voc_path);
+    string_bundle tweet_bundle = read_words(tweet_path[tweet_id]);
+    string[] voc = string_bundle_array(voc_bundle);
+    string[] tweet = string_bundle_array(tweet_bundle);
+    int voc_len = string_bundle_length(voc_bundle);
+    int[] freq = alloc_array(int, voc_len);
+    //@assert voc_len == \length(voc);
+    int tweet_len = string_bundle_length(tweet_bundle);
+    string tweetfile = merge(tweet, tweet_len);
+    
+    
+    
+    sort(voc, 0, voc_len);
+    
+    int cnt_fast = count_vocab(voc, freq, voc_len, tweetfile, true);
+    int cnt_low = count_vocab(voc, freq, voc_len, tweetfile, false);
+    printint(cnt_fast);
+    printint(cnt_low);
+    return 0;
+}
+//
+//cc0 -d -w -o doslingos lib/*.c0 duplicates.c0 doslingos.c0 doslingos-test.c0
+// ./doslingos

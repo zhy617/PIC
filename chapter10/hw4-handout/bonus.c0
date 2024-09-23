@@ -1,0 +1,35 @@
+#use <string>
+#use <parse>
+#use <conio>
+#use <args>
+#use <util>
+
+void op_xor(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  push(S, x ^ y);
+}
+
+void op_and(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  push(S, x & y);
+}
+
+void op_or(stack S)
+//@requires !stack_empty(S);
+//@ensures !stack_empty(S);
+{
+  int x = pop(S);
+  if(stack_empty(S))error("insufficient numbers");
+  int y = pop(S);
+  push(S, x | y);
+}

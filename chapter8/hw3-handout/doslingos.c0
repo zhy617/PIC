@@ -1,0 +1,42 @@
+// #use "duplicates.c0"
+// #use "lib/readfile.c0"
+// #use "lib/stringsearch.c0"
+#use <string>
+#use <parse>
+
+int count_vocab(string[] vocab, int[] freq, int v,
+                string tweetfile,
+                bool fast)
+//@requires v == \length(vocab) && v == \length(freq);
+//@requires is_sorted(vocab, 0, v) && all_distinct(vocab, v);
+//@ensures \result <= num_tokens(tweetfile);
+{
+    int tweet_len = num_tokens(tweetfile);
+    string[] tweet = parse_tokens(tweetfile);
+    //@assert tweet_len == \length(tweet);
+    int cnt_notin = 0;
+    for(int i = 0; i < tweet_len; i++)
+    //@loop_invariant 0 <= i && i <= tweet_len;
+    {
+        int id = -1;
+        if(fast)
+        {
+            id = binsearch(tweet[i], vocab, v);
+        }
+        else
+        {
+            id = linsearch(tweet[i], vocab, v);
+        }
+        if(id == -1)
+        {
+            cnt_notin++;
+        }
+        else
+        {
+            //@assert 0 <= id && id < v;
+            freq[id]++;
+        }
+    }
+    return cnt_notin;
+    // return 0;
+}

@@ -1,0 +1,45 @@
+// #use "lib/arrayutil.c0"
+#use <rand>
+#use <parse>
+#use <string>
+bool if_same(string[] A, string[] B, int n)
+//@requires \length(A) == \length(B) && \length (A) == n;
+
+{
+    for(int i = 0; i < n; i++){
+        if(!is_in(A[i], B, 0, n))return false;
+    }
+    for(int i = 0; i < n; i++){
+        if(!is_in(B[i], A, 0, n))return false;
+    }
+    return true;
+}
+
+int main(){
+    int seed = 0x3f3f3f3f;
+    rand_t gen = init_rand(seed);
+    string[] out;
+
+    string[] Zero = alloc_array(string, 0);
+    out = sortcopy(Zero, 0, 0);
+    //@assert is_sorted(out, 0, 0);
+
+    string[] One = alloc_array(string, 1);
+    One[0] = "newbe";
+    out = sortcopy(One, 0, 1);
+    //@assert is_sorted(out, 0, 1);
+
+    int n = 1<<4;
+    int test_cnt = 50;
+    string[] A = alloc_array(string, n);
+    for(int i = 0; i < test_cnt; i++ )
+    {
+        for(int j = 0; j < n; j++ ){
+            A[j] = string_fromint(rand(gen));
+        }
+        out = sortcopy(A, 0, n);
+        //@assert is_sorted(out, 0, n);
+        //@assert if_same(A, out, n);
+    }
+    return 0;
+}

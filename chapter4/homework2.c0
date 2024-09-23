@@ -1,0 +1,27 @@
+#use <conio>
+int copy_into(int[] source,int i,int n,int[] target,int j)
+//@requires \length(source)>i+n-1;
+//@requires \length(target)>j+n-1;
+//@ensures \result==j+n-1;
+{
+	for(int k=0;k<n;k++)
+	//@loop_invariant k>=0;
+	{
+		target[j+k]=source[i+k];
+	}
+	return j+n-1;
+
+}
+
+void test(int i,int n,int j){
+	int[] A=alloc_array(int,10);
+	int[] B=alloc_array(int,10);
+	for(int k=0;k<10;k++){
+		A[k]=k;
+	}
+	printint(copy_into(A,i,n,B,j));
+
+	for(int k=0;k<10;k++){
+		printint(B[k]);
+	}
+}

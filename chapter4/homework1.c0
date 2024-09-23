@@ -1,0 +1,12 @@
+int[] array_part(int[] A,int i,int j)
+//@requires 0<=i&&j<\length(A)&&i<=j;
+//@ensures \length(\result)==j-i+1;
+{
+	int[] ans=alloc_array(int,j-i+1);
+	for(int k=0;k<j-i+1;k++)
+	//@loop_invariant 0<=k;
+	{
+		ans[k]=A[i+k];
+	}
+	return ans;
+}

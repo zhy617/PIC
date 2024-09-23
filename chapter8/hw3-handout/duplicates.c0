@@ -1,0 +1,56 @@
+// #use "lib/arrayutil.c0"
+bool all_distinct(string[] A, int n)
+//@requires 0 <= n && n <= \length(A);
+//@requires is_sorted(A, 0, n);
+//@ensures true;//?
+{
+    for(int i=0;i<n;i++)
+    //@loop_invariant 0 <= i && i <= n;
+    {
+        if(i!=0){
+            if(string_compare(A[i], A[i-1])==0)return false;
+        }
+        if(i!=n-1){
+            if(string_compare(A[i], A[i+1])==0)return false;
+        }
+    }
+    return true;
+}
+
+int count_distinct(string[] A, int n)
+//@requires 0 <= n && n <= \length(A);
+//@requires is_sorted(A, 0, n);
+//@ensures !all_distinct(A,n)||\result == n;
+{
+    int cnt = 0;
+    for(int i=0;i<n;i++)
+    //@loop_invariant 0 <= i && i <= n;
+    {
+        if(i==0||string_compare(A[i],A[i-1])!=0)cnt+=1;
+    }
+    return cnt;
+}
+
+string[] remove_duplicates(string[] A, int n)
+//@requires 0 <= n && n <= \length(A);
+//@requires is_sorted(A, 0, n);
+//@ensures all_distinct(\result, n);
+//@ensures \length(\result) == count_distinct(A, n);
+//@ensures is_sorted(\result, 0, \length(\result));
+{
+    int lenB=count_distinct(A,n);
+    string[] B = alloc_array(string, lenB);
+    int j=0;
+    for(int i=0;i<n;i++)
+    //@loop_invariant 0<=i&&i<=n;
+    //@loop_invariant 0<=j&&j<=lenB;
+    {
+        if(i==0||!string_equal(A[i],A[i-1]))
+        {
+            B[j]=A[i];
+            j++;
+        }
+    }
+    return B;
+}
+

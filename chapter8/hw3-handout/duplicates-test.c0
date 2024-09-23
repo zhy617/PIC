@@ -1,0 +1,37 @@
+// #use "duplicates.c0"
+// #use "lib/stringsearch.c0"
+// #use "lib/readfile.c0"
+#use "sort.c0"
+#use <conio>
+// string read
+void test_bundle(string[] A, int n)
+{
+    sort(A, 0, n);
+    all_distinct(A, n);
+    count_distinct(A, n);
+    remove_duplicates(A, n);
+}
+
+int main()
+{
+    int tweet_id=0;
+    string voc_path = "texts/news_vocab_sorted.txt";
+    string[] tweet_path = alloc_array(string, 3);
+    tweet_path[0] = "texts/scotttweet.txt";
+    tweet_path[1] = "texts/twitter_1k.txt";
+    tweet_path[2] = "texts/twitter_200k.txt";
+    string_bundle voc_bundle = read_words(voc_path);
+    string_bundle tweet_bundle = read_words(tweet_path[tweet_id]);
+    string[] voc = string_bundle_array(voc_bundle);
+    string[] tweet = string_bundle_array(tweet_bundle);
+    int voc_len = string_bundle_length(voc_bundle);
+    //@assert voc_len == \length(voc);
+    int tweet_len = string_bundle_length(tweet_bundle);
+    test_bundle(voc, voc_len);
+    test_bundle(tweet, tweet_len);
+    
+    return 0;
+}
+//
+// cc0 -d -w -o duplicates lib/*.c0 duplicates.c0 duplicates-test.c0
+// ./duplicates

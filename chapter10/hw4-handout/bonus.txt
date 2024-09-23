@@ -1,0 +1,2 @@
+    In the bonus.c0, we add the features to fit the bacis 
+binary operations,such as the "xor", "or", "and".
